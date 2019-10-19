@@ -1,0 +1,156 @@
+{% extends 'bases/base.html' %}
+
+{% block main %}
+    <section class="fdb-block bg-dark" style="background-image: url(imgs/hero/purple.svg);">
+        <div class="container">
+            <div class="row">
+            <div class="col text-center">
+                <h1>Ingrediants</h1>
+            </div>
+            </div>
+    
+            <div class="row-70"></div>
+    
+            <div class="row text-center justify-content-sm-center no-gutters mb-4">
+                <div class="col-12 col-sm-10 col-md-8 col-lg-7 col-xl-3 m-auto">
+                    <div class="fdb-box fdb-touch">
+                    <h2>Ingrediant 1</h2>
+                    <p>Nom</p>
+                    <p>notes</p>
+                    <p class="mt-4"><a href="https://www.froala.com">Learn More <i class="fas fa-angle-right"></i></a></p>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-10 col-md-8 col-lg-7 col-xl-3 m-auto pt-5 pt-xl-0">
+                    <div class="fdb-box fdb-touch">
+                    <h2>Ingrediant 2</h2>
+                    <p>Nom</p>
+                    <p>notes</p>
+                    <p class="mt-4"><a href="https://www.froala.com">Learn More <i class="fas fa-angle-right"></i></a></p>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-10 col-md-8 col-lg-7 col-xl-3 m-auto pt-5 pt-xl-0">
+                    <div class="fdb-box fdb-touch">
+                    <h2>Ingrediant 3</h2>
+                    <p>Nom</p>
+                    <p>notes</p>
+                    <p class="mt-4"><a href="https://www.froala.com">Learn More <i class="fas fa-angle-right"></i></a></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row text-center justify-content-sm-center no-gutters">
+                <div class="col-12 col-sm-10 col-md-8 col-lg-7 col-xl-3 m-auto">
+                    <div class="fdb-box fdb-touch">
+                    <h2>Ingrediant 4</h2>
+                    <p>Nom</p>
+                    <p>notes</p>
+                    <p class="mt-4"><a href="https://www.froala.com">Learn More <i class="fas fa-angle-right"></i></a></p>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-10 col-md-8 col-lg-7 col-xl-3 m-auto pt-5 pt-xl-0">
+                    <div class="fdb-box fdb-touch">
+                    <h2>Ingrediant 5</h2>
+                    <p>Nom</p>
+                    <p>notes</p>
+                    <p class="mt-4"><a href="https://www.froala.com">Learn More <i class="fas fa-angle-right"></i></a></p>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-10 col-md-8 col-lg-7 col-xl-3 m-auto pt-5 pt-xl-0">
+                    <div class="fdb-box fdb-touch">
+                    <h2>Ingrediant 6</h2>
+                    <p>Nom</p>
+                    <p>notes</p>
+                    <p class="mt-4"><a href="https://www.froala.com">Learn More <i class="fas fa-angle-right"></i></a></p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        </section>
+{% endblock %}
+
+{% block vue %}
+<script>
+var app = new Vue({
+    el: '#app',
+    data: {
+        loader: true,
+        content:false,
+        base_url:"",
+        category_id: "",
+        data_all_category:[],
+        data_all_ingredient_by_categorie:[],
+        data_single_ingredient:""
+    },
+    delimiters: ["${","}"],
+    mounted(){
+        this.category_id = "{{ pk }}"
+        console.log(this.category_id)
+        this.getdata()
+    },
+    methods: {
+        getdata: function(){
+            this.base_url = 'http://127.0.0.1:8000'
+            console.log('data getting')
+            axios.defaults.xsrfCookieName = 'csrftoken'
+            axios.defaults.xsrfHeaderName = 'X-CSRFToken'
+            
+
+            axios({
+                url: this.base_url + '/graphql',
+                method: 'post',
+                data: {
+                    query: `
+                    query{
+                        allCategories(first:5){
+                          pageInfo {
+                            hasNextPage,
+                            hasPreviousPage,
+                            startCursor,
+                            endCursor,
+                          },
+                          edges{
+                            node{
+                              id,
+                              name
+                            }
+                          }
+                        },
+                        category(id:"${this.category_id}"){
+                          name,
+                          ingredients {
+                            edges {
+                              node {
+                                id,
+                                name
+                              }
+                            }
+                          }
+                        },
+                        ingredient(id:"SW5ncmVkaWVudE5vZGU6MTE="){
+                          name,
+                          notes,
+                          category{
+                            name
+                          }
+                        }
+                      }
+                    `
+                }
+            })
+            .then(response => {
+                result = response.data.data
+                console.log(result)
+                this.data_all_ingredient_by_categorie = result.category.ingredients.edges
+                console.log(this.data_all_ingredient_by_categorie)
+                this.data_all_category = result.allCategories.edges
+                console.log(this.data_all_category)
+            })
+            .catch((err) => {
+                console.log(err);
+            })
+        },
+    }
+})
+</script>
+{% endblock vue %}
